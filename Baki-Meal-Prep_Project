@@ -1,0 +1,374 @@
+
+CREATE DATABASE BakiMealPrep
+--DROP DATABASE BakiMealPrep
+USE BakiMealPrep
+CREATE TABLE MsStaff (
+	StaffID CHAR (5) NOT NULL PRIMARY KEY
+		CHECK (StaffID LIKE 'ST[0-9][0-9][0-9]'),
+	StaffName VARCHAR (64) NOT NULL
+		CHECK (LEN(StaffName) > 3),
+	StaffAddress VARCHAR (64) NOT NULL,
+	StaffGender VARCHAR (10) NOT NULL
+		CHECK (StaffGender IN ('Male', 'Female')),
+	StaffEmail VARCHAR (64) NOT NULL
+		CHECK (StaffEmail LIKE '%@%'),
+	StaffPhone BIGINT NOT NULL
+		CHECK (LEN(StaffPhone) = 13),
+	StaffSalary INT NOT NULL
+
+)
+
+CREATE TABLE MsRegionalBranch (
+	BranchID CHAR (5) NOT NULL PRIMARY KEY
+		CHECK (BranchID LIKE 'RB[0-9][0-9][0-9]'),
+	BranchName VARCHAR (64) NOT NULL
+		CHECK (LEN(BranchName) > 5),
+	BranchEmail VARCHAR (64) NOT NULL
+		CHECK (BranchEmail LIKE '%@%'),
+	BranchPhone BIGINT NOT NULL
+		CHECK (LEN(BranchPhone) = 13),
+	BranchAddress VARCHAR (64) NOT NULL
+
+)
+
+CREATE TABLE MsMealPrep (
+	MealID CHAR (5) NOT NULL PRIMARY KEY
+		CHECK (MealID LIKE 'PM[0-9][0-9][0-9]'),
+	MealName VARCHAR (64) NOT NULL,
+	MealExpiryDate DATE NOT NULL
+		CHECK (YEAR(MealExpiryDate) >= 2021),
+	MealSalesPrice INT NOT NULL
+		CHECK (MealSalesPrice >= 50000),
+	MealPurchasePrice INT NOT NULL,
+	MealStock INT NOT NULL
+		CHECK (MealStock > 0)
+
+)
+--DROP TABLE MsCustomer
+CREATE TABLE MsCustomer (
+	CustomerID CHAR (5) NOT NULL PRIMARY KEY
+		CHECK (CustomerID LIKE 'CS[0-9][0-9][0-9]'),
+	CustomerName VARCHAR (64) NOT NULL
+		CHECK (LEN(CustomerName) > 5),
+	CustomerGender VARCHAR (10) NOT NULL
+		CHECK (CustomerGender = 'Male' OR CustomerGender = 'Female'),
+	CustomerAddress VARCHAR (64) NOT NULL,
+	CustomerPhone BIGINT NOT NULL
+		CHECK (LEN(CustomerPhone) = 13),
+	CustomerEmail VARCHAR (64) NOT NULL
+		CHECK (CustomerEmail LIKE '%@%')
+
+)
+
+CREATE TABLE PurchaseTransactionHeader (
+	PurchaseID CHAR(5) NOT NULL PRIMARY KEY
+		CHECK (PurchaseID LIKE 'PC[0-9][0-9][0-9]'),
+	StaffID CHAR(5) 
+		FOREIGN KEY REFERENCES MsStaff (StaffID) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL,
+	BranchID CHAR(5)
+		FOREIGN KEY REFERENCES MsRegionalBranch (BranchID) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL,
+	PurchaseDate DATE NOT NULL
+)
+
+CREATE TABLE PurchaseTransactionDetail (
+	PurchaseID CHAR(5)
+		FOREIGN KEY REFERENCES PurchaseTransactionHeader (PurchaseID) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL,
+	PurchaseQuantity INTEGER NOT NULL,
+	MealID CHAR(5) 
+		FOREIGN KEY REFERENCES MsMealPrep (MealID) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL,
+)
+
+CREATE TABLE SalesTransactionHeader (
+	SalesID CHAR(5) NOT NULL PRIMARY KEY
+		CHECK (SalesID LIKE 'SS[0-9][0-9][0-9]'),
+	StaffID CHAR(5)
+		FOREIGN KEY REFERENCES MsStaff (StaffID) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL,
+	CustomerID CHAR(5)
+		FOREIGN KEY REFERENCES MsCustomer (CustomerID) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL,
+	SalesDate DATE NOT NULL
+)
+
+CREATE TABLE SalesTransactionDetail (
+	SalesID CHAR(5)
+		FOREIGN KEY REFERENCES SalesTransactionHeader (SalesID) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL,
+	SalesQuantity INTEGER NOT NULL,
+	MealID CHAR(5)
+		FOREIGN KEY REFERENCES MsMealPrep (MealID) ON UPDATE CASCADE ON DELETE CASCADE NOT NULL,
+)
+
+
+
+-----------------------------------------------------
+
+
+INSERT INTO MsStaff (StaffID, StaffName, StaffAddress, StaffGender, StaffEmail, StaffPhone, StaffSalary) VALUES 
+('ST001', 'Angela Stephanie', 'Jalan Kebon Pisang', 'Female', 'angela@gmail.com', 08112345678909, 10000000),
+('ST002', 'Angelica Viryaputri', 'Jalan Kebon Jeruk', 'Female', 'angelica@gmail.com', 08112345678908, 4000000),
+('ST003', 'Farhan Ramadhani', 'Jalan Kebon Anggur', 'Male', 'farhan@gmail.com', 08112345678907, 15000000),
+('ST004', 'Hanif Al Farizi', 'Jalan Mawar Merah', 'Male', 'hanif@hotmail.com', 08112345678906, 4500000),
+('ST005', 'Joko Antwar', 'Jalan Mawar Putih', 'Male', 'joko@yahoo.com', 08112345678905, 5500000),
+('ST006', 'Alika Solehati', 'Jalan Mawar Biru', 'Female', 'alika@gmail.com', 08112345678904, 6000000),
+('ST007', 'Jessica Kamila', 'Jalan Merdeka Raya', 'Female', 'jeskamil@hotmail.com', 08112345678903, 3000000),
+('ST008', 'Putri Salsabila', 'Jalan Merdeka I', 'Female', 'putri@gmail.com', 08112345678902, 2500000),
+('ST009', 'James Emmanuel', 'Jalan Merdeka II', 'Male', 'james@gmail.com', 08112345678901, 4500000),
+('ST010', 'Daniel Gunawan', 'Jalan Merdeka III', 'Male', 'daniel@hotmail.com', 08112345678900, 6000000)
+
+
+INSERT INTO MsRegionalBranch (BranchID, BranchName, BranchEmail, BranchPhone, BranchAddress) VALUES 
+('RB001','Kediri Meal Prep', 'kediriMealPrep@gmail.com',08124511797127,'Jalan kediri'),
+('RB002','Meal Prep Tangerang', 'MealPrep@gmail.com',08112531464744,'Jalan Thamrin'),
+('RB003','Indigo Meal Prep', 'iMealPrep@gmail.com',08126781954674,'Jalan Chicago'),
+('RB004','MealPre Tangerang', 'MealPre@gmail.com',08122637139493,'Jalan Soul'),
+('RB005','Elijah Meal', 'ElijahMealPrep@gmail.com',08112212376559,'Jalan Path'),
+('RB006','MealPep', 'MealPepMealPrep@gmail.com',08123567184932,'Jalan Walk'),
+('RB007','US MealPrep', 'USMealPrep@gmail.com',08125361889765,'Jalan sendiri'),
+('RB008','WE MealPrep', 'WEMealPrep@gmail.com',08112561783978,'Jalan Tujuan'),
+('RB009','Hi MealPrep', 'HiMealPrep@gmail.com',08124521783793,'Jalan Siluhman'),
+('RB010','Yuhu MealPrep', 'YuhuMealPrep@gmail.com',08176417283723,'Jalan ditempat')
+
+INSERT INTO MsMealPrep(MealID, MealName, MealExpiryDate, MealSalesPrice, MealPurchasePrice, MealStock) VALUES 
+('PM001', 'Katsu', '2022-06-03', 56000, 40000, 50),
+('PM002', 'Pancake Box', '2022-07-11', 72000, 30000, 62),
+('PM003', 'Oatmeal Box', '2023-06-23', 60000, 45000, 73),
+('PM004', 'Pizza', '2023-07-16', 80000, 50000, 24),
+('PM005', 'Donut', '2025-06-03', 61000, 35000, 48),
+('PM006', 'Kebab', '2023-06-03', 56000, 40000, 70),
+('PM007', 'Vegan Nugget', '2022-06-03', 82000, 40000, 22),
+('PM008', 'Vegan Wagyu A6', '2024-06-03', 475000, 100000, 56),
+('PM009', 'Mantau', '2022-06-03', 60000, 42000, 30),
+('PM010', 'Vegekari', '2021-06-03', 62000, 45000, 70)
+
+INSERT INTO MsCustomer (CustomerID, CustomerName, CustomerGender, CustomerAddress, CustomerPhone, CustomerEmail) VALUES
+ ('CS001', 'Rumania', 'Male', 'Jalan Panjang No.23', 08966732819012, 'rum.rum@gmail.com' ),
+ ('CS002', 'Bryan Chang', 'Male', 'Jalan Nanas Blok A No.1', 08234554322337, 'bryanc@gmail.com' ),
+ ('CS003', 'Anastasia Putri', 'Female', 'Jalan Jendral Sudirman No.3', 08983956739283, 'putri.an@gmail.com' ),
+ ('CS004', 'Rudolf Herman', 'Male', 'Jalan Sukabumi No. 2', 08234684759314, 'rudolfman@gmail.com' ),
+ ('CS005', 'Titi Kusmani', 'Female', 'Jalan Lintas Surga No. 45', 08923465739481, 'ti2.kusman1@gmail.com' ),
+ ('CS006', 'Roro Sinta', 'Female', 'Jalan kebajikan Blok K No. 4', 08122466758948, 'sintaro@gmail.com' ),
+ ('CS007', 'Sony Rida', 'Male', 'Jalan Taman Palem 3 No. 5', 08456783645679, 'sony.r@gmail.com' ),
+ ('CS008', 'Jessica Elaine', 'Female', 'Jalan Utama Blok N No.7', 08923457689486, 'jesselaine@gmail.com' ),
+ ('CS009', 'Michael Rully', 'Male', 'Jalan Kintamani No. 10', 08123457583642, 'michael.ly@gmail.com' ),
+ ('CS010', 'Clarissa Ang', 'Female', 'Jalan Bedugul No. 12', 08961234562780, 'clarissang@gmail.com' )
+
+ SELECT * FROM MsCustomer
+
+INSERT INTO PurchaseTransactionHeader (PurchaseID, StaffID, BranchID, PurchaseDate) VALUES
+
+--('PC001', 'ST004', 'RB002', '2021-5-16'),
+--('PC002', 'ST006', 'RB004', '2021-5-17'),
+--('PC003', 'ST001', 'RB002', '2021-6-21')
+
+
+('PC004', 'ST008', 'RB009', '2021-7-10'),
+('PC005', 'ST008', 'RB001', '2021-7-12'),
+('PC006', 'ST008', 'RB007', '2021-7-15'),
+('PC007', 'ST002', 'RB005', '2021-7-15'),
+('PC008', 'ST002', 'RB002', '2021-7-15'),
+('PC009', 'ST007', 'RB010', '2021-7-16'),
+('PC010', 'ST007', 'RB003', '2021-7-18')
+
+
+INSERT INTO PurchaseTransactionDetail (PurchaseID, PurchaseQuantity, MealID) VALUES
+--Soal No 1
+--('PC001', 3, 'PM002'),
+--('PC001', 2, 'PM005'),
+--('PC002', 4, 'PM002'),
+--('PC002', 2, 'PM001'),
+--('PC003', 3, 'PM003')
+
+
+('PC004', '20', 'PM004'),
+('PC004', '25', 'PM007'),
+('PC004', '10', 'PM003'),
+('PC005', '20', 'PM009'),
+('PC005', '5', 'PM008'),
+('PC005', '7', 'PM001'),
+('PC006', '3', 'PM010'),
+('PC006', '17', 'PM005'),
+('PC007', '5', 'PM001'),
+('PC008', '3', 'PM008'),
+('PC008', '10', 'PM006'),
+('PC009', '20', 'PM007'),
+('PC009', '15', 'PM009'),
+('PC010', '5', 'PM003'),
+('PC010', '10', 'PM002')
+
+INSERT INTO SalesTransactionHeader (SalesID, StaffID, CustomerID, SalesDate) VALUES
+
+('SS001', 'ST010', 'CS007', '2021-10-2'),
+('SS002', 'ST008', 'CS001', '2021-10-4'),
+('SS003', 'ST009', 'CS003', '2021-10-5')
+('SS004', 'ST005', 'CS006', '2021-10-5')
+
+INSERT INTO SalesTransactionDetail (SalesID, SalesQuantity, MealID) VALUES
+
+('SS001', '3', 'PM008'), 
+('SS002', '1', 'PM008'),
+('SS003', '4', 'PM008')
+('SS004', '3', 'PM006')
+
+--  1.	Display RegionalBranchName, PurchaseDate, 
+--	Total Item Purchase (obtained from the sum of meal prep quantity) 
+--	for every purchase date is before the 20th day of the month 
+--	and the regional branch’s name contains “Tangerang” in their name.
+
+SELECT BranchName, PurchaseDate, SUM(PurchaseQuantity) AS [Total Item Purchase]
+FROM MsRegionalBranch mrb JOIN PurchaseTransactionHeader pth ON mrb.BranchID = pth.BranchID
+	 JOIN PurchaseTransactionDetail ptd ON pth.PurchaseID = ptd.PurchaseID
+WHERE DAY(PurchaseDate) < 20 AND BranchName LIKE '%Tangerang%'
+GROUP BY BranchName, PurchaseDate
+
+-- 2.	Display StaffName, SalesDate (obtained from sales date in ‘dd mon yyyy’ format), 
+--	and Total Sales (obtained from the total number of different prep meal sold in one transaction) 
+--	for every staff salary is less than 5000000
+--	and sales occurred in October or November.  
+
+	SELECT StaffName, CONVERT(VARCHAR(16), SalesDate, 106) AS [SalesDate],
+		   SUM(MealID) AS [Total Sales]
+	FROM MsStaff ms JOIN SalesTransactionHeader sth ON ms.StaffID = sth.StaffID
+		 JOIN SalesTransactionDetail std ON sth.SalesID = std.SalesID
+	WHERE StaffSalary < 5000000 
+		  AND MONTH(SalesDate) = 10 OR MONTH(SalesDate) = 11
+
+--  3. Display StaffName, Average Purchase Quantity 
+--	(obtained from average purchase quantity), 
+--	Total Meal Supplied (obtain by adding ‘ Meal’ at the end of the sum 
+--	of purchased meal quantity), 
+--	for every transaction handled by staff whose gender is female 
+--	and total Meal Prep purchased less than 8.  
+
+SELECT ms.StaffID, StaffName, AVG(PurchaseQuantity) AS [Average Purchase Quantity],
+	   CAST(SUM(PurchaseQuantity) AS VARCHAR) + ' Meal' AS [Total Meal Supplied]
+FROM MsStaff ms JOIN PurchaseTransactionHeader pth ON ms.StaffID = pth.StaffID
+	 JOIN PurchaseTransactionDetail ptd ON pth.PurchaseID = ptd.PurchaseID
+WHERE StaffGender LIKE 'Female'
+GROUP BY StaffName, ms.StaffID
+--HAVING COUNT(MealID) < 8
+
+
+-- 5.	Display RegionalBranchAddress, 
+--	BranchPhone (obtained by replacing branch phone first character into ‘+62’), 
+--	PurchaseDate, StaffName, 
+--	and Quantity (obtain by adding ‘ pcs’ at the end of total purchase quantity) 
+--	for every transaction that quantity is greater than the average of all purchase quantity 
+--	and the transaction occurred in September or December. 
+
+SELECT BranchAddress, CONCAT('+62 ', BranchPhone) AS [BranchPhone], PurchaseDate, StaffName,
+	   CONVERT(VARCHAR (16), PurchaseQuantity) + ' pcs' AS [Quantity]
+FROM MsRegionalBranch mrb JOIN PurchaseTransactionHeader pth ON mrb.BranchID = pth.BranchID
+	 JOIN PurchaseTransactionDetail ptd ON pth.PurchaseID = ptd.PurchaseID
+	 JOIN MsStaff ms ON pth.StaffID = ms.StaffID,
+	 (
+		SELECT AVG(PurchaseQuantity) AS Rata2
+		FROM PurchaseTransactionDetail
+	 ) AS Subquery
+WHERE PurchaseQuantity > Subquery.Rata2
+	  AND MONTH(PurchaseDate) = 9 OR MONTH(PurchaseDate) = 12
+
+
+-- 6.	Display Customer ID (obtained by replacing ‘CS’ with ‘Customer ’), 
+-- Handle by (obtained by replacing ‘ST00’ into ‘Staff ’), 
+-- Total Meal Prep Sales Price (obtained from the total of sales price times quantity 
+-- and adding ‘Rp. ’ in front of  Total Meal Prep Sales Price), MealPrepName, and Quantity 
+-- for every transaction where the sales price is the highest and quantity more than 2. 
+
+SELECT 'Customer ' + SUBSTRING(mc.CustomerID, 3, LEN(mc.CustomerID)) AS [Customer ID],
+	   'Staff ' + SUBSTRING(StaffID, 4, LEN(StaffID)) AS [Handle by],
+	   'Rp. ' + CONVERT(VARCHAR, SUM(MealSalesPrice * SalesQuantity)) AS [Total Meal Prep Sales Price],
+	   MealName, SalesQuantity
+FROM MsCustomer mc JOIN SalesTransactionHeader sth ON mc.CustomerID = sth.CustomerID
+	 JOIN SalesTransactionDetail std ON sth.SalesID = std.SalesID
+	 JOIN MsMealPrep mmp ON std.MealID = mmp.MealID,
+	 (
+		SELECT MAX(MealSalesPrice) AS Highest
+		FROM MsMealPrep
+	 ) AS Subquery
+WHERE MealSalesPrice IN (Subquery.Highest) AND
+	  SalesQuantity > 2
+GROUP BY mc.CustomerID, StaffID, MealName, SalesQuantity
+
+
+-- 7.	Display Last Name (obtained from staff’s last name), 
+--	Total Purchase Has been done (obtained from the total number of the different meal prep purchased in one transaction), 
+--	and StaffSalary 
+--	for every transaction handled by female staff 
+--	that has salary less than the average of all staff salary.  
+
+SELECT RIGHT(StaffName, (LEN(StaffName) - CHARINDEX(' ', StaffName))) AS [Last Name],
+	   COUNT(MealID) AS [Total Purchase Has been done], StaffSalary
+FROM MsStaff ms JOIN PurchaseTransactionHeader pth ON ms.StaffID = pth.StaffID
+	 JOIN PurchaseTransactionDetail ptd ON pth.PurchaseID = ptd.PurchaseID,
+	 (
+		SELECT AVG(StaffSalary) AS Rata2
+		FROM MsStaff
+	 ) AS Subquery
+WHERE StaffGender LIKE 'Female'
+	  AND StaffSalary < Subquery.Rata2
+GROUP BY StaffName, StaffSalary
+
+
+-- 8.	Display Staff Initial (obtained from the first character of staff’s name and last character of staff’s name in uppercase format), 
+--	CustomerID, 
+--	Total Sales (obtained from the total number of meal prep sold in transaction), 
+--	SalesDate 
+--	for every transaction that quantity is the smallest and happened on month 9.  
+
+SELECT UPPER(LEFT(StaffName, 1) + RIGHT(StaffName, 1)) AS [Staff Initial],
+	   mc.CustomerID, COUNT(MealID) AS [Total Sales], SalesDate
+FROM MsCustomer mc JOIN SalesTransactionHeader sth ON mc.CustomerID = sth.CustomerID
+	 JOIN SalesTransactionDetail std ON sth.SalesID = std.SalesID
+	 JOIN MsStaff ms ON sth.StaffID = ms.StaffID,
+	 (
+		SELECT (SUM(SalesQuantity)) AS Smallest
+		FROM SalesTransactionDetail
+		GROUP BY SalesID
+
+	 ) AS Subquery
+WHERE MONTH(SalesDate) = 9 AND
+	  (
+		SELECT MIN(Smallest.Subquery)
+		FROM SalesTransactionDetail
+	  )
+GROUP BY StaffName, mc.CustomerID, SalesDate
+
+
+
+
+--  9.	Create a view named ‘ViewPurchaseTransaction’ 
+--	to display StaffEmail, Purchase Date, 
+--	Total Purchase Meal Prep (obtained from the sum of quantity), 
+--	and Total Purchase Transaction (obtained from the total number of meal prep purchased in one transaction) 
+--	for every staff whose email contains ‘@gmail’ or ‘@hotmail’ 
+--	and total purchase Meal Prep more than 50.  
+
+GO
+CREATE VIEW [ViewPurchaseTransaction] AS
+SELECT StaffEmail, PurchaseDate, SUM(PurchaseQuantity) AS [Total Purchase Meal Prep],
+	   COUNT(MealID) AS [Total Purchase Transaction]
+FROM MsStaff ms JOIN PurchaseTransactionHeader pth ON ms.StaffID = pth.StaffID
+	 JOIN PurchaseTransactionDetail ptd ON pth.PurchaseID = ptd.PurchaseID
+WHERE StaffEmail IN ('%@gmail%', '%@hotmail%')
+GROUP BY StaffEmail, PurchaseDate
+HAVING SUM(PurchaseQuantity) > 50
+
+
+-- 10. Create a view named ‘ViewSalesTransaction’ to display StaffName, 
+-- Sales Date (obtained from sales date in ‘Mon dd, yyyy’ format), 
+-- Total Sales Transaction (obtained from the total number of meal prep sold in one transaction), 
+-- Total Sales Quantity (obtained from the sum of quantity)
+-- for every transaction that meal prep’s sales price is less than 450000 
+-- and total sales transaction is greater than 1.  
+
+CREATE VIEW ViewSalesTransaction
+AS
+SELECT StaffName,
+	   [Sales Date] = CONVERT(VARCHAR, SalesDate, 107),
+	   [Total Sales Transaction] = COUNT(std.MealID),
+	   [Total Sales Quantity] = SUM(SalesQuantity)
+FROM MsStaff s
+JOIN SalesTransactionHeader sth ON s.StaffID = sth.StaffID
+JOIN SalesTransactionDetail std ON std.SalesID = sth.SalesID
+JOIN MsMealPrep mp  ON mp.MealID = std.MealID
+WHERE MealSalesPrice < 450000
+GROUP BY StaffName, CONVERT(VARCHAR, SalesDate, 107)
+HAVING COUNT(sth.SalesID) > 1
